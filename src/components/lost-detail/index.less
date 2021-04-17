@@ -1,0 +1,107 @@
+@shadow: 2px 2px 3px #e8e8e8,
+  -1px -1px 2px #e8e8e8,
+  -1px 1px 2px #e8e8e8,
+  1px -1px 2px #e8e8e8;
+
+.detailContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  //width: 450px;
+  height: 300px;
+  box-shadow: @shadow;
+  border-radius: 20px;
+  margin: 16px;
+  padding: 16px;
+  background-color: #FFF;
+
+  .left-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    flex-grow: 1;
+    min-height: 100%;
+    margin-right: 16px;
+    border-radius: 20px;
+
+    .content-container {
+      flex: 1;
+      width: 100%;
+      margin: 16px;
+      padding-right: 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+
+      .top-content, .time-content, .location-content {
+        border-bottom: solid 1px #E8E8E8;
+      }
+    }
+  }
+
+  .right-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 200px;
+    min-height: 100%;
+    border-radius: 20px;
+
+    .image-container {
+      width: 100%;
+      height: 212px;
+      margin-bottom: 16px;
+      border-radius: 20px;
+      box-shadow: @shadow;
+
+      .ant-carousel {
+        height: 212px !important;
+        border-radius: 20px;
+
+        .slick-slide {
+          text-align: center;
+          height: 212px !important;
+          line-height: 212px;
+          overflow: hidden;
+          border-radius: 20px;
+
+          img {
+            height: 212px !important;
+            object-fit: cover;
+            margin: auto;
+            border-radius: 20px;
+          }
+        }
+
+        .slick-dots {
+          button {
+            background: #000
+          }
+        }
+      }
+    }
+
+    .button-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      height: 40px;
+
+      .button {
+        flex: 1;
+        border-radius: 20px;
+        box-shadow: @shadow;
+      }
+    }
+  }
+}
+
+.detailContainer:hover{
+  background-color: #f8f8f8;
+}
+.detailContainer:active{
+  background-color: #f0f2f5;
+}

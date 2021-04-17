@@ -1,25 +1,22 @@
-import logo from './logo.svg';
-import './App.css';
+import React, {Component} from 'react';
+import {BrowserRouter, Switch, Route, Redirect} from 'react-router-dom';
+import IncidentAdd from "./pages/incident/add";
+import IncidentUpdate from "./pages/incident/update";
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+/*
+应用的根组件
+ */
+export default class App extends Component {
+
+    render () {
+    return (
+        <BrowserRouter>
+            <Switch>
+                <Route path={"/add"} component={IncidentAdd}/>
+                <Route path={"/update"} component={IncidentUpdate}/>
+                <Redirect to={"/add"}/>
+            </Switch>
+        </BrowserRouter>
+    )
+  }
 }
-
-export default App;
