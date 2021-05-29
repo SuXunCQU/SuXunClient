@@ -1,5 +1,5 @@
 import React, {PureComponent} from 'react'
-import {Button, Card, Col, DatePicker, Form, Icon, Input, message, Radio, Row} from 'antd'
+import {Button, Card, Col, DatePicker, Form, Icon, Input, message, Modal, Radio, Row} from 'antd'
 import TextArea from "antd/es/input/TextArea";
 
 import Index from '../../components/pictures-wall'
@@ -86,7 +86,8 @@ class IncidentAdd extends PureComponent {
                 values.lostTime = values['lostTime'].format(format);
 
                 const incident = {...values, theLostPictures};
-
+                this.theLostPictures = theLostPictures;
+                console.log(theLostPictures);
                 // 如果是更新, 需要添加id
                 if (this.isUpdate) {
                     incident.id = this.incident.id
@@ -94,15 +95,31 @@ class IncidentAdd extends PureComponent {
 
                 // TO DO
                 // 2. 调用接口请求函数去添加/更新
-                const result = await reqAddOrUpdateIncident(incident)
-
-                // 3. 根据结果提示
-                if (result.status === 0) {
-                    message.success(`${this.isUpdate ? '更新' : '添加'}事件成功!`)
-                    this.props.history.goBack()
-                } else {
-                    message.error(`${this.isUpdate ? '更新' : '添加'}事件失败!`)
-                }
+                // const result = await reqAddOrUpdateIncident(incident)
+                //
+                // // 3. 根据结果提示
+                // if (result.status === 0) {
+                //     message.success(`${this.isUpdate ? '更新' : '添加'}事件成功!`)
+                //     this.props.history.goBack()
+                // } else {
+                //     message.error(`${this.isUpdate ? '更新' : '添加'}事件失败!`)
+                // }
+                Modal.confirm({
+                    content: "请确认是否要提交？",
+                    cancelText: "取消",
+                    okText: "提交",
+                    onOk: () => {
+                        return new Promise((resolve, reject) => {
+                            setTimeout(() => {
+                                Modal.success({
+                                    content: "提交成功",
+                                    okText: "确定",
+                                });
+                                resolve("success");
+                            }, 1000)
+                        })
+                    }
+                })
             }
         })
     }
@@ -145,6 +162,21 @@ class IncidentAdd extends PureComponent {
             }
             console.log(searchType, searchName);
         }
+    }
+
+    componentDidMount() {
+        Modal.confirm({
+            okText: "允许",
+            cancelText: "拒绝",
+            content: "本网站需要收集您的位置信息以方便统计",
+            onOk: () => {
+                if(navigator.geolocation){
+                    navigator.geolocation.getCurrentPosition((result)=>{
+                        console.log(result);
+                    })
+                }
+            }
+        })
     }
 
 
@@ -315,10 +347,10 @@ class IncidentAdd extends PureComponent {
                             <Item label="走失者照片">
                                 {
                                     getFieldDecorator('theLostPicture', {
-                                        // initialValue: incident.theLostPicture,
-                                        rules: [
-                                            {required: true, message: '必须上传走失者照片'},
-                                        ]
+                                        initialValue: this.theLostPictures,
+                                        // rules: [
+                                        //     {required: true, message: '必须上传走失者照片'},
+                                        // ]
                                     })(<Index ref={this.pictureWall}/>)
                                 }
                             </Item>

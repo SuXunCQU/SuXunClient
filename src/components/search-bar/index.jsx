@@ -26,25 +26,26 @@ class SearchBar extends Component {
     render() {
         const {searchType, searchName} = this.state;
         const searchTypes = this.props.searchTypes;
-        console.log(searchType);
 
         return (
-            <div style={{width: "auto", height: "auto"}}>
-                <Select
-                    value={searchType}
-                    style={{width: 160}}
-                    onChange={value => this.setState({searchType: value})}
-                >
-                    {
-                        searchTypes.map((searchType,index) => <Option key={index} value={searchType.value}>{searchType.title}</Option>)
-                    }
-                </Select>
-                <Input
-                    placeholder='关键字'
-                    style={{width: 160, margin: '0 15px'}}
-                    value={searchName}
-                    onChange={event => this.setState({searchName: event.target.value})}
-                />
+            <div style={{width: "auto", height: "auto", display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center"}}>
+                <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center"}}>
+                    <Select
+                        value={searchType}
+                        style={{width: 160}}
+                        onChange={value => this.setState({searchType: value})}
+                    >
+                        {
+                            searchTypes.map((searchType,index) => <Option key={index} value={searchType.value}>{searchType.title}</Option>)
+                        }
+                    </Select>
+                    <Input
+                        placeholder='关键字'
+                        style={{width: 160, margin: '0 15px'}}
+                        value={searchName}
+                        onChange={event => this.setState({searchName: event.target.value})}
+                    />
+                </div>
                 <Button type='primary' onClick={() => this.props.getData(searchType,searchName)}>搜索</Button>
             </div>
         );

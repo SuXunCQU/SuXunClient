@@ -1,18 +1,18 @@
 import React, {PureComponent} from 'react'
-import {Button, Card, Col, DatePicker, Form, Icon, Input, message, Radio, Row} from 'antd'
+import {useLocation} from 'react-router-dom';
+import {Button, Card, Col, DatePicker, Form, Icon, Input, message, Modal, Radio, Row} from 'antd'
 import TextArea from "antd/es/input/TextArea";
-
+import Locale from 'antd/es/date-picker/locale/zh_CN';
 import Index from '../../components/pictures-wall'
 import SearchBar from "../../components/search-bar";
 import {reqAddOrUpdateIncident} from '../../api'
-import Locale from 'antd/es/date-picker/locale/zh_CN';
 
 
 import moment from "moment";
 import 'moment/locale/zh-cn';
 import {format, formatTime} from "../../utils/dateUtils";
 import {validateAge, validateIDNumber} from "../../utils/validateUtils";
-import {incident_data} from '../../utils/mockUtils';
+import {incident_data} from '../../utils/mockUtils.new';
 
 moment.locale('zh-cn');
 
@@ -33,6 +33,10 @@ class IncidentUpdate extends PureComponent {
         this.state = {
             isUpdate: false,
             searchTypes: [
+                {
+                    value: 'theLostId',
+                    title: '按走失者ID搜索',
+                },
                 {
                     value: 'theLostName',
                     title: '按走失者姓名搜索',
@@ -56,9 +60,14 @@ class IncidentUpdate extends PureComponent {
     getIncident = (searchType, searchName) => {
         const size = this.incidents.length;
         let item = {};
-        console.log(searchName);
-        console.log(searchType);
         switch (searchType){
+            case "theLostId":
+                searchName = parseInt(searchName);
+                for(let i = 0; i < size; i++){
+                    if(this.incidents[i].lost_id === searchName)
+                        item = this.incidents[i];
+                }
+                break;
             case "theLostName":
                 for(let i = 0; i < size; i++){
                     if(this.incidents[i].lost_name === searchName)
@@ -133,15 +142,31 @@ class IncidentUpdate extends PureComponent {
 
                 // TO DO
                 // 2. 调用接口请求函数去添加/更新
-                const result = await reqAddOrUpdateIncident(incident)
-
-                // 3. 根据结果提示
-                if (result.status === 0) {
-                    message.success(`${this.isUpdate ? '更新' : '添加'}事件成功!`)
-                    this.props.history.goBack()
-                } else {
-                    message.error(`${this.isUpdate ? '更新' : '添加'}事件失败!`)
-                }
+                // const result = await reqAddOrUpdateIncident(incident)
+                //
+                // // 3. 根据结果提示
+                // if (result.status === 0) {
+                //     message.success(`${this.isUpdate ? '更新' : '添加'}事件成功!`)
+                //     this.props.history.goBack()
+                // } else {
+                //     message.error(`${this.isUpdate ? '更新' : '添加'}事件失败!`)
+                // }
+                Modal.confirm({
+                    content: "请确认是否要提交？",
+                    cancelText: "取消",
+                    okText: "提交",
+                    onOk: () => {
+                        return new Promise((resolve, reject) => {
+                            setTimeout(() => {
+                                Modal.success({
+                                    content: "提交成功",
+                                    okText: "确定",
+                                });
+                                resolve("success");
+                            }, 1000)
+                        })
+                    }
+                })
             }
         })
     }
@@ -187,7 +212,18 @@ class IncidentUpdate extends PureComponent {
     }
 
     componentDidMount() {
-        // console.log(incident_data);
+        Modal.confirm({
+            okText: "允许",
+            cancelText: "拒绝",
+            content: "本网站需要收集您的位置信息以方便统计",
+            onOk: () => {
+                if(navigator.geolocation){
+                    navigator.geolocation.getCurrentPosition((result)=>{
+                        console.log(result);
+                    })
+                }
+            }
+        })
     }
 
 
@@ -209,15 +245,6 @@ class IncidentUpdate extends PureComponent {
         // 头部左侧标题
         const title = (
             <div style={{display: "flex", justifyContent: "flex-start", alignItems: "center", }}>
-                <Button
-                    style={{marginRight: "16px"}}
-                    type={"primary"}
-                    onClick={() => {
-                        this.setState(() => ({
-                            isUpdate: true,
-                        }))
-                    }}
-                >修改事件</Button>
                 <span style={{maxWidth: "500px"}}><SearchBar searchTypes={searchTypes} getData={this.getIncident}/></span>
             </div>
         )
@@ -240,28 +267,33 @@ class IncidentUpdate extends PureComponent {
                                         rules: [
                                             {required: true, message: '必须输入走失者姓名'}
                                         ]
-                                    })(<Input placeholder='请输入走失者姓名' disabled={!incident}/>)
+                                    })(<Input placeholder='请输入走失者姓名' disabled={!incident}
+                                              onChange={(e) => {
+                                                  let data = Object.assign(incident, {lost_name: e.target.value});
+                                                  this.setState({
+                                                      incident: data,
+                                                  })
+                                              }}
+                                    />)
                                 }
                             </Item>
                         </Col>
                         <Col span={12}>
                             <Item label='报失者姓名'>
-
                                 {
                                     getFieldDecorator('reporterName', {
-                                        // initialValue: incident.reporterName,
+                                        initialValue: incident && incident.reporter_name,
                                         rules: [
                                             {required: true, message: '必须输入报失者姓名'}
                                         ]
                                     })(<Input placeholder='请输入报失者姓名' disabled={!incident}
-                                              onChange={(e)=>{
-                                                  console.log(e);
-                                                  let data = Object.assign({lost_name: e.target.value}, incident);
-                                                  console.log(data);
+                                              onChange={(e) => {
+                                                  let data = Object.assign(incident, {reporter_name: e.target.value});
                                                   this.setState({
                                                       incident: data,
                                                   })
-                                              }}/>)
+                                              }}
+                                    />)
                                 }
                             </Item>
                         </Col>
@@ -271,13 +303,19 @@ class IncidentUpdate extends PureComponent {
                             <Item label="走失者性别">
                                 {
                                     getFieldDecorator('theLostGender', {
-                                        // initialValue: incident.theLostGender,
+                                        initialValue: incident && incident.lost_gender,
                                         rules: [
                                             {required: true, message: '必须输入走失者性别'}
                                         ]
                                     })(<Radio.Group
-                                        onChange={(e)=>{this.incident['theLostGender']=e.target.value}}
-                                        name='theLostGender' disabled={!incident}>
+                                        name='theLostGender' disabled={!incident}
+                                        onChange={(e) => {
+                                            let data = Object.assign(incident, {lost_gender: e.target.value});
+                                            this.setState({
+                                                incident: data,
+                                            })
+                                        }}
+                                    >
                                         <Radio value={1}>男</Radio>
                                         <Radio value={0}>女</Radio>
                                     </Radio.Group>)
@@ -288,12 +326,17 @@ class IncidentUpdate extends PureComponent {
                             <Item label="报失者性别">
                                 {
                                     getFieldDecorator('reporterGender', {
-                                        // initialValue: incident.reporterGender,
+                                        initialValue: incident && incident.reporter_gender,
                                         rules: [
                                             {required: true, message: '必须输入报失者性别'}
                                         ]
                                     })(<Radio.Group
-                                        onChange={(e)=>{this.incident['reporterGender']=e.target.value}}
+                                        onChange={(e) => {
+                                            let data = Object.assign(incident, {reporter_gender: e.target.value});
+                                            this.setState({
+                                                incident: data,
+                                            })
+                                        }}
                                         name='reporterGender' disabled={!incident}>
                                         <Radio value={1}>男</Radio>
                                         <Radio value={0}>女</Radio>
@@ -308,12 +351,19 @@ class IncidentUpdate extends PureComponent {
 
                                 {
                                     getFieldDecorator('theLostAge', {
-                                        // initialValue: incident.theLostAge,
+                                        initialValue: incident && incident.lost_age,
                                         rules: [
                                             {required: true, message: '必须输入走失者年龄'},
                                             {validator: validateAge}
                                         ]
-                                    })(<Input type='number' placeholder='请输入走失者年龄' disabled={!incident}/>)
+                                    })(<Input type='number' placeholder='请输入走失者年龄' disabled={!incident}
+                                              onChange={(e) => {
+                                                  let data = Object.assign(incident, {lost_age: e.target.value});
+                                                  this.setState({
+                                                      incident: data,
+                                                  })
+                                              }}
+                                    />)
                                 }
                             </Item>
                         </Col>
@@ -322,11 +372,18 @@ class IncidentUpdate extends PureComponent {
 
                                 {
                                     getFieldDecorator('reporterPhoneNumber', {
-                                        // initialValue: incident.reporterPhoneNumber,
+                                        initialValue: incident && incident.reporter_phone,
                                         rules: [
                                             {required: true, message: '必须输入报失者联系电话'}
                                         ]
-                                    })(<Input placeholder='请输入报失者联系电话' disabled={!incident}/> )
+                                    })(<Input placeholder='请输入报失者联系电话' disabled={!incident}
+                                              onChange={(e) => {
+                                                  let data = Object.assign(incident, {reporter_phone: e.target.value});
+                                                  this.setState({
+                                                      incident: data,
+                                                  })
+                                              }}
+                                    /> )
                                 }
                             </Item>
                         </Col>
@@ -337,7 +394,7 @@ class IncidentUpdate extends PureComponent {
                                 {
                                     getFieldDecorator('lostTime', {
                                         // 在DatePicker中使用getFieldDecorator需要设置initialValue，而不能用defaulValue
-                                        // initialValue: moment(incident.lostTime, format),
+                                        // initialValue: incident && incident.lost_time,
                                         rules: [
                                             {required: true, message: '必须输入走失时间'},
                                         ]
@@ -355,8 +412,15 @@ class IncidentUpdate extends PureComponent {
                             <Item label='报失者家庭住址'>
                                 {
                                     getFieldDecorator('reporterLocation', {
-                                        // initialValue: incident.reporterLocation,
-                                    })(<Input placeholder='请输入报失者家庭住址' disabled={!incident}/>)
+                                        initialValue: incident && incident.reporter_address,
+                                    })(<Input placeholder='请输入报失者家庭住址' disabled={!incident}
+                                              onChange={(e) => {
+                                                  let data = Object.assign(incident, {reporter_address: e.target.value});
+                                                  this.setState({
+                                                      incident: data,
+                                                  })
+                                              }}
+                                    />)
                                 }
                             </Item>
                         </Col>
@@ -366,11 +430,18 @@ class IncidentUpdate extends PureComponent {
                             <Item label="走失地点">
                                 {
                                     getFieldDecorator('lostLocation', {
-                                        // initialValue: incident.lostLocation,
+                                        initialValue: incident && incident.lost_place,
                                         rules: [
                                             {required: true, message: '必须输入走失地点'},
                                         ]
-                                    })(<Input placeholder='请输入走失地点' disabled={!incident}/>)
+                                    })(<Input placeholder='请输入走失地点' disabled={!incident}
+                                              onChange={(e) => {
+                                                  let data = Object.assign(incident, {lost_place: e.target.value});
+                                                  this.setState({
+                                                      incident: data,
+                                                  })
+                                              }}
+                                    />)
                                 }
                             </Item>
                         </Col>
@@ -379,8 +450,15 @@ class IncidentUpdate extends PureComponent {
 
                                 {
                                     getFieldDecorator('relationship', {
-                                        // initialValue: incident.relationship,
-                                    })(<Input placeholder='请输入报失者与走失者关系' disabled={!incident}/>)
+                                        initialValue: incident && incident.relation,
+                                    })(<Input placeholder='请输入报失者与走失者关系' disabled={!incident}
+                                              onChange={(e) => {
+                                                  let data = Object.assign(incident, {relation: e.target.value});
+                                                  this.setState({
+                                                      incident: data,
+                                                  })
+                                              }}
+                                    />)
                                 }
                             </Item>
                         </Col>
@@ -391,11 +469,18 @@ class IncidentUpdate extends PureComponent {
 
                                 {
                                     getFieldDecorator('theLostIDNumber', {
-                                        // initialValue: incident.theLostIDNumber,
+                                        initialValue: incident && incident.lost_idcard_number,
                                         rules: [
                                             {validator: validateIDNumber}
                                         ]
-                                    })(<Input placeholder='请输入走失者身份证号' disabled={!incident}/>)
+                                    })(<Input placeholder='请输入走失者身份证号' disabled={!incident}
+                                              onChange={(e) => {
+                                                  let data = Object.assign(incident, {lost_idcard_number: e.target.value});
+                                                  this.setState({
+                                                      incident: data,
+                                                  })
+                                              }}
+                                    />)
                                 }
                             </Item>
                         </Col>
@@ -403,8 +488,15 @@ class IncidentUpdate extends PureComponent {
                             <Item label='报失者微信'>
                                 {
                                     getFieldDecorator('reporterWeChat', {
-                                        // initialValue: incident.reporterWeChat,
-                                    })(<Input placeholder='请输入报失者微信' disabled={!incident}/>)
+                                        initialValue: incident && incident.reporter_wechat,
+                                    })(<Input placeholder='请输入报失者微信' disabled={!incident}
+                                              onChange={(e) => {
+                                                  let data = Object.assign(incident, {reporter_wechat: e.target.value});
+                                                  this.setState({
+                                                      incident: data,
+                                                  })
+                                              }}
+                                    />)
                                 }
                             </Item>
                         </Col>
@@ -414,10 +506,10 @@ class IncidentUpdate extends PureComponent {
                             <Item label="走失者照片">
                                 {
                                     getFieldDecorator('theLostPicture', {
-                                        // initialValue: incident.theLostPicture,
-                                        rules: [
-                                            {required: true, message: '必须上传走失者照片'},
-                                        ]
+                                        initialValue: incident && incident.photo,
+                                        // rules: [
+                                        //     {required: true, message: '必须上传走失者照片'},
+                                        // ]
                                     })(<Index ref={this.pictureWall}/>)
                                 }
                             </Item>
@@ -433,10 +525,16 @@ class IncidentUpdate extends PureComponent {
                             <Item label="走失者特征">
                                 {
                                     getFieldDecorator('theLostFeatures', {
-                                        // initialValue: incident.theLostFeatures,
-                                    })(<TextArea placeholder="请输入走失者体态外貌等特征" autosize={{minRows: 2, maxRows: 6}} disabled={!incident}/>)
+                                        initialValue: incident && incident.appearance,
+                                    })(<TextArea placeholder="请输入走失者体态外貌等特征" autoSize={{minRows: 2, maxRows: 6}} disabled={!incident}
+                                                 onChange={(e) => {
+                                                     let data = Object.assign(incident, {appearance: e.target.value});
+                                                     this.setState({
+                                                         incident: data,
+                                                     })
+                                                 }}
+                                    />)
                                 }
-
                             </Item>
                         </Col>
                     </Row>

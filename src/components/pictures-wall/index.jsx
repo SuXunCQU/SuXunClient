@@ -80,15 +80,16 @@ export default class Index extends React.Component {
     // 一旦上传成功, 将当前上传的file的信息修正(name, url)
     if(file.status==='done') {
       const result = file.response  // {status: 0, data: {name: 'xxx.jpg', url: '图片地址'}}
-      if(result.status===0) {
-        message.success('上传图片成功!')
-        const {name, url} = result.data
-        file = fileList[fileList.length-1]
-        file.name = name
-        file.url = url
-      } else {
-        message.error('上传图片失败')
-      }
+      message.success('上传图片成功!')
+      // if(result.status===0) {
+      //   message.success('上传图片成功!')
+      //   const {name, url} = result.data
+      //   file = fileList[fileList.length-1]
+      //   file.name = name
+      //   file.url = url
+      // } else {
+      //   message.error('上传图片失败')
+      // }
     } else if (file.status==='removed') { // 删除图片
       const result = await reqDeleteImg(file.name)
       if (result.status===0) {
@@ -107,7 +108,7 @@ export default class Index extends React.Component {
     const uploadButton = (
       <div>
         <Icon type="plus" />
-        <div>Upload</div>
+        <div>上传</div>
       </div>
     );
     return (

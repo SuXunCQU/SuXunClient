@@ -11,9 +11,9 @@
   height: 300px;
   box-shadow: @shadow;
   border-radius: 20px;
-  margin: 16px;
   padding: 16px;
   background-color: #FFF;
+
 
   .left-container {
     display: flex;
@@ -33,9 +33,12 @@
       flex-direction: column;
       justify-content: space-between;
       align-items: center;
-
-      .top-content, .time-content, .location-content {
+      .top-content, .time-content, .location-content, .bottom-content {
+        height: 100%;
         border-bottom: solid 1px #E8E8E8;
+        .ant-descriptions-row > th, .ant-descriptions-row > td{
+          padding-bottom: 1px;
+        }
       }
     }
   }

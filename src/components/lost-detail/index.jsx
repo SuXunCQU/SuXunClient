@@ -15,22 +15,15 @@ class LostDetail extends Component {
     render() {
         const data = this.props.data || LostData[0]
         const {status, mission_id} = this.props;
-
+        console.log(data);
         return (
             <section className={"detailContainer"}>
                 <div className="left-container">
-                    <header>
-                        <Steps current={status} size={"small"} type={"navigation"}>
-                            <Step title={"启动"}/>
-                            <Step title={"进行"}/>
-                            <Step title={"完成/暂缓"}/>
-                        </Steps>
-                    </header>
                     <section className="content-container">
                         <div className="top-content">
                             <Descriptions>
                                 <Descriptions.Item label="姓名">{data.lost_name}</Descriptions.Item>
-                                <Descriptions.Item label="性别">{data.lost_gender}</Descriptions.Item>
+                                <Descriptions.Item label="性别">{data.lost_gender ? "男" : "女"}</Descriptions.Item>
                                 <Descriptions.Item label="年龄">{data.lost_age}</Descriptions.Item>
                             </Descriptions>
                         </div>
@@ -41,12 +34,22 @@ class LostDetail extends Component {
                         </div>
                         <div className="location-content">
                             <Descriptions column={1}>
-                                <Descriptions.Item label="走失地点">{data.lost_location}</Descriptions.Item>
+                                <Descriptions.Item label="走失地点">{data.lost_place}</Descriptions.Item>
                             </Descriptions>
                         </div>
                         <div className="bottom-content">
                             <Descriptions column={1}>
                                 <Descriptions.Item label="其他信息" className="extraInfo">{data.lost_appearance || "其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息"}</Descriptions.Item>
+                            </Descriptions>
+                        </div>
+                        <div className="bottom-content">
+                            <Descriptions column={1}>
+                                <Descriptions.Item label="家属姓名">{data.reporter_name || "其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息"}</Descriptions.Item>
+                            </Descriptions>
+                        </div>
+                        <div>
+                            <Descriptions column={1}>
+                                <Descriptions.Item label="家属联系方式">{data.reporter_phone || "其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息其他信息"}</Descriptions.Item>
                             </Descriptions>
                         </div>
                     </section>
@@ -67,13 +70,6 @@ class LostDetail extends Component {
                                 <h3>4</h3>
                             </div>
                         </Carousel>
-                    </div>
-                    <div className="button-container">
-                        <Button
-                            type={"primary"}
-                            className={"button"}
-                            onClick={() => this.props.history.push('/home/command', {data, mission_id})}
-                        >查看详情</Button>
                     </div>
                 </div>
             </section>
